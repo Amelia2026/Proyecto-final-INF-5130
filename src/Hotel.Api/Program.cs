@@ -2,7 +2,9 @@ using System.Text;
 using System.Text.Json.Serialization;
 using Hotel.Api.Auth;
 using Hotel.Api.Errores;
+using Hotel.Application.Catalogos;
 using Hotel.Application.Reservas;
+using Hotel.Application.Tablero;
 using Hotel.Infrastructure;
 using Hotel.Infrastructure.Persistencia;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -17,6 +19,10 @@ builder.Services.AgregarInfraestructura(cadena);
 
 // 2) Casos de uso de Application
 builder.Services.AddScoped<ReservaServicio>();
+builder.Services.AddScoped<TipoHabitacionServicio>();
+builder.Services.AddScoped<HabitacionServicio>();
+builder.Services.AddScoped<ClienteServicio>();
+builder.Services.AddScoped<TableroServicio>();
 
 // 3) Seguridad: JWT
 var jwt = builder.Configuration.GetSection("Jwt").Get<JwtOpciones>()

@@ -21,12 +21,13 @@ public class UnidadDeTrabajo : IUnidadDeTrabajo
             await transaccion.CommitAsync(ct);
             return resultado;
         }
-        catch (DbUpdateException ex) when (ex.InnerException is SqlException { Number: 2601 or 2627 })
+        catch (DbUpdateException ex) when (ex.InnerException is SqlException { Number: 2601 or 2627 or 547 })
         {
-            // 2601 / 2627 = violación de unicidad (ej. dos estadías activas, dos pagos de una reserva).
+            // 2601 / 2627 = violación de unicidad (dos estadías activas, dos pagos, nombre repetido).
+            // 547 = violación de llave foránea (borrar algo que otra tabla todavía usa).
             throw new ConflictoDePersistenciaException(
-                "La operación chocó con otra que se estaba realizando. Intente de nuevo.");
+                "La operación chocó con otra o con datos existentes. Intente de nuevo.");
         }
-        // Si hay cualquier otra excepción, al salir del 'await using' la transacción se deshace sola (rollback).
+        // Cualquier otra excepción: al salir del 'await using' la transacción se deshace sola (rollback).
     }
 }

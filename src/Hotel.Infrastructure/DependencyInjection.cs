@@ -23,6 +23,8 @@ public static class DependencyInjection
         servicios.AddScoped<IReservaRepositorio, ReservaRepositorio>();
         servicios.AddScoped<IHabitacionRepositorio, HabitacionRepositorio>();
         servicios.AddScoped<IClienteRepositorio, ClienteRepositorio>();
+        servicios.AddScoped<ITipoHabitacionRepositorio, TipoHabitacionRepositorio>();
+        servicios.AddScoped<IResumenConsulta, ResumenConsulta>();
         servicios.AddScoped<IUnidadDeTrabajo, UnidadDeTrabajo>();
         servicios.AddSingleton<IReloj, RelojSantoDomingo>();
         return servicios;
