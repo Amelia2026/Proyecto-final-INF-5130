@@ -1,0 +1,32 @@
+using Hotel.Application.Abstracciones;
+using Hotel.Application.Excepciones;
+using Hotel.Infrastructure.Persistencia;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+
+namespace Hotel.Infrastructure.Repositorios;
+
+public class UnidadDeTrabajo : IUnidadDeTrabajo
+{
+    private readonly HotelDbContext _db;
+    public UnidadDeTrabajo(HotelDbContext db) => _db = db;
+
+    public async Task<T> EjecutarEnTransaccionAsync<T>(Func<Task<T>> operacion, CancellationToken ct = default)
+    {
+        await using var transaccion = await _db.Database.BeginTransactionAsync(ct);
+        try
+        {
+            var resultado = await operacion();
+            await _db.SaveChangesAsync(ct); // todos los cambios juntos (ej. reserva + pago)
+            await transaccion.CommitAsync(ct);
+            return resultado;
+        }
+        catch (DbUpdateException ex) when (ex.InnerException is SqlException { Number: 2601 or 2627 })
+        {
+            // 2601 / 2627 = violación de unicidad (ej. dos estadías activas, dos pagos de una reserva).
+            throw new ConflictoDePersistenciaException(
+                "La operación chocó con otra que se estaba realizando. Intente de nuevo.");
+        }
+        // Si hay cualquier otra excepción, al salir del 'await using' la transacción se deshace sola (rollback).
+    }
+}
