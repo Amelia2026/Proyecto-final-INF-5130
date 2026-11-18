@@ -1,10 +1,15 @@
 using Hotel.Domain.Entidades;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hotel.Infrastructure.Persistencia;
 
-/// <summary>La "puerta" de EF Core a la base de datos: una propiedad por tabla.</summary>
-public class HotelDbContext : DbContext
+/// <summary>
+/// Una sola "puerta" a la base de datos para las tablas del hotel Y las de Identity (usuarios y roles).
+/// Heredar de IdentityDbContext es lo que agrega las tablas AspNetUsers, AspNetRoles, etc.
+/// </summary>
+public class HotelDbContext : IdentityDbContext<IdentityUser>
 {
     public HotelDbContext(DbContextOptions<HotelDbContext> options) : base(options) { }
 
@@ -15,5 +20,8 @@ public class HotelDbContext : DbContext
     public DbSet<Pago> Pagos => Set<Pago>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
-        => modelBuilder.ApplyConfigurationsFromAssembly(typeof(HotelDbContext).Assembly);
+    {
+        base.OnModelCreating(modelBuilder); // configura las tablas de Identity
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(HotelDbContext).Assembly);
+    }
 }
