@@ -113,7 +113,29 @@ public class ReservaTests
         var reserva = CrearReserva();
         reserva.Cancelar(Hoy);
 
-        Assert.False(reserva.BloqueaDisponibilidad(new Periodo(Viernes, Lunes)));
+        Assert.False(reserva.BloqueaDisponibilidad(new Periodo(Viernes, Lunes), Hoy));
+    }
+
+    [Fact]
+    public void BloqueaDisponibilidad_EstadiaVigente_NoBloqueaUnPeriodoFuturoQueNoSeSolapa()
+    {
+        var reserva = CrearReserva(); // viernes -> lunes
+        reserva.RegistrarCheckIn(Viernes, otraEstadiaActiva: false);
+        var futuro = new Periodo(Lunes.AddDays(5), Lunes.AddDays(7));
+
+        // hoy = viernes: la salida prevista (lunes) todavía no llega
+        Assert.False(reserva.BloqueaDisponibilidad(futuro, Viernes));
+    }
+
+    [Fact]
+    public void BloqueaDisponibilidad_EstadiaConSalidaVencidaSinCheckOut_BloqueaHastaRegistrarla()
+    {
+        var reserva = CrearReserva();
+        reserva.RegistrarCheckIn(Viernes, otraEstadiaActiva: false);
+        var futuro = new Periodo(Lunes.AddDays(5), Lunes.AddDays(7));
+
+        // hoy = lunes: ya debía salir y no se registró el check-out
+        Assert.True(reserva.BloqueaDisponibilidad(futuro, Lunes));
     }
 
     // ---- Cancelación ----

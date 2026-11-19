@@ -68,7 +68,7 @@ public class ReservaServicio
             // Disponibilidad: ¿alguna reserva activa de esta habitación estorba en ese período?
             var activas = await _reservas.ListarActivasDeHabitacionAsync(habitacion.Id, ct);
             var periodo = nueva.ObtenerPeriodo();
-            if (activas.Any(r => r.BloqueaDisponibilidad(periodo)))
+            if (activas.Any(r => r.BloqueaDisponibilidad(periodo, hoy)))
                 throw new HabitacionNoDisponibleException(
                     $"La habitación {habitacion.Numero} ya está reservada u ocupada en ese período.");
 

@@ -59,13 +59,15 @@ public class Reserva
 
     /// <summary>
     /// ¿Esta reserva impide reservar la habitación en el período dado?
-    /// Reservada: solo si se solapa. EnEstadia: bloquea hasta que se registre el check-out.
+    /// Reservada: solo si su período se solapa con el pedido.
+    /// EnEstadia: ocupa su propio período; y si su fecha de salida ya llegó (hoy) sin registrar el check-out,
+    /// bloquea cualquier reserva nueva hasta que se registre la salida.
     /// Cancelada y Finalizada no bloquean.
     /// </summary>
-    public bool BloqueaDisponibilidad(Periodo solicitado) => Estado switch
+    public bool BloqueaDisponibilidad(Periodo solicitado, DateOnly hoy) => Estado switch
     {
         EstadoReserva.Reservada => ObtenerPeriodo().SolapaCon(solicitado),
-        EstadoReserva.EnEstadia => solicitado.Salida > Entrada,
+        EstadoReserva.EnEstadia => ObtenerPeriodo().SolapaCon(solicitado) || Salida <= hoy,
         _ => false
     };
 
