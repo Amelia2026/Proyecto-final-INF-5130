@@ -5,7 +5,39 @@
     var roles = string.Join(", ", User.Claims
         .Where(c => c.Type == System.Security.Claims.ClaimTypes.Role)
         .Select(c => c.Value));
+    var cultura = System.Globalization.CultureInfo.InvariantCulture;
 }
 
 <h1 class="h3">Inicio</h1>
-<p>Sesión iniciada como <strong>@User.Identity?.Name</strong> (@roles).</p>
+<p class="text-muted">Sesión iniciada como <strong>@User.Identity?.Name</strong> (@roles).</p>
+
+@if (Model.Error is not null)
+{
+    <div class="alert alert-danger" role="alert">@Model.Error</div>
+}
+else if (Model.Resumen is { } r)
+{
+    var tarjetas = new (string Titulo, string Valor)[]
+    {
+        ("Habitaciones en servicio", r.HabitacionesActivas.ToString(cultura)),
+        ("Clientes", r.Clientes.ToString(cultura)),
+        ("Reservas vigentes", r.ReservasVigentes.ToString(cultura)),
+        ("Estadías activas", r.EnEstadia.ToString(cultura)),
+        ("Reservas finalizadas", r.Finalizadas.ToString(cultura)),
+        ("Total cobrado", "RD$" + r.TotalCobrado.ToString("N2", cultura))
+    };
+
+    <div class="row g-3">
+        @foreach (var t in tarjetas)
+        {
+            <div class="col-6 col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="text-muted small">@t.Titulo</div>
+                        <div class="fs-3">@t.Valor</div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
